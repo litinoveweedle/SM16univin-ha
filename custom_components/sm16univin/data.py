@@ -3,7 +3,7 @@ LINK = "https://sequentmicrosystems.com/products/sixteen-analog-digital-inputs-8
 
 import lib16univin
 API = lib16univin.SM16univin
-DOMAIN = "SM16univin"
+DOMAIN = "sm16univin"
 NAME_PREFIX = "sm16ui"
 SM_MAP = {
     "binary_sensor": {
@@ -18,7 +18,7 @@ SM_MAP = {
         "dig_rst": {
                 "chan_no": 16,
                 "com": {
-                    "get": "reset_dig_in_counter",
+                    "set": "reset_dig_in_counter",
                 },
         }
     },
@@ -45,7 +45,6 @@ SM_MAP = {
                 "chan_no": 16,
                 "com": {
                     "get": "get_dig_in_counter",
-                    "set": "set_dig_in_counter",
                 },
         },
         "u": {
