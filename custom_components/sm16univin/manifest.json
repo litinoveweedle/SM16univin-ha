@@ -12,7 +12,7 @@
 	],
 	"config_flow": true,
 	"requirements": [
-		"SM16univin>=1.0.0",
+		"SM16univin>=1.1.0",
 		"SMcommonHA>=0.0.2"
 	]
 }

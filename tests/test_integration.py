@@ -77,6 +77,7 @@ def hardware(hass, monkeypatch):
         class FakeCard:
             def __init__(self, stack):
                 self.stack = stack
+                self._card_rev_major = 2
 
         for name, method in methods.items():
             setattr(FakeCard, name, method)
@@ -88,9 +89,11 @@ def hardware(hass, monkeypatch):
 
 
 def first_entity():
-    platform = next(iter(SM_MAP))
-    kind = next(iter(SM_MAP[platform]))
-    return platform, kind, f"{kind}_1"
+    for platform, types in SM_MAP.items():
+        for kind, metadata in types.items():
+            if not metadata.get("optional"):
+                return platform, kind, f"{kind}_1"
+    raise AssertionError("No default entity")
 
 
 async def test_yaml_migration_and_configuration(hass, hardware):
@@ -171,6 +174,8 @@ async def test_ui_setup_duplicate_and_unload(hass, hardware):
     assert entity_id is not None
     for entity_platform, types in SM_MAP.items():
         for entity_type, metadata in types.items():
+            if metadata.get("optional"):
+                continue
             for channel in range(1, metadata["chan_no"] + 1):
                 unique_id = f"{entity_platform}.{DOMAIN}1_{entity_type}_{channel}"
                 registered_id = registry.async_get_entity_id(entity_platform, DOMAIN, unique_id)
@@ -206,6 +211,54 @@ async def test_reset_button_calls_the_selected_channel(hass, hardware):
     assert entity_id is not None
     await hass.services.async_call("button", "press", {"entity_id": entity_id}, blocking=True)
     assert calls == [(2, 3)]
+
+
+async def test_input_type_updates_real_sensor_state_and_units(hass, hardware):
+    class FakeCard:
+        _card_rev_major = 3
+        input_type = "0_10V"
+
+        def __init__(self, _stack):
+            pass
+
+        def get_input_type(self, _channel):
+            return self.input_type
+
+        def cfg_input_type(self, _channel, value):
+            type(self).input_type = value
+
+        def get_u_in(self, _channel):
+            return 12.5
+
+    hardware.CARD.api = FakeCard
+    assert await async_setup_component(hass, "homeassistant", {})
+    assert await async_setup_component(
+        hass, DOMAIN, {DOMAIN: [{"stack": "0", "input_type_2": None, "u_2": None}]}
+    )
+    await hass.async_block_till_done()
+    registry = entity_registry.async_get(hass)
+    select_id = registry.async_get_entity_id("select", DOMAIN, "select.sm16univin0_input_type_2")
+    sensor_id = registry.async_get_entity_id("sensor", DOMAIN, "sensor.sm16univin0_u_2")
+    assert select_id and sensor_id
+
+    for option, expected in [("4-20 mA", "mA"), ("0-3.3 V", "V")]:
+        await hass.services.async_call(
+            "select", "select_option", {"entity_id": select_id, "option": option}, blocking=True
+        )
+        await hass.services.async_call(
+            "homeassistant", "update_entity", {"entity_id": sensor_id}, blocking=True
+        )
+        state = hass.states.get(sensor_id)
+        assert state.state == "12.5"
+        assert state.attributes["unit_of_measurement"] == expected
+
+    await hass.services.async_call(
+        "select", "select_option", {"entity_id": select_id, "option": "1k thermistor"}, blocking=True
+    )
+    await hass.services.async_call(
+        "homeassistant", "update_entity", {"entity_id": sensor_id}, blocking=True
+    )
+    assert hass.states.get(sensor_id).state == "unknown"
 
 
 @pytest.mark.parametrize(

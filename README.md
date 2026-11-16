@@ -156,6 +156,17 @@ been removed; set the clock manually or with a Home Assistant automation using
 `datetime.set_value`. Set previously local-time RTCs once after upgrading. The
 default RTC read interval is 30 seconds and can be changed in the options.
 
+## Optional capabilities
+
+Select these entities under **Configure**; existing entity selections are unchanged.
+
+Optional entities include `input_type_1..16` and `led_1..16`. Input-type selection is available only on V3+ cards; on older cards it is unavailable and jumpers determine the type. The `u` sensor reports V or mA according to the V3+ input type and is unknown when a thermistor mode is selected; use the corresponding resistance sensor for thermistors.
+
+Watchdog entities are `watchdog_reload_1`, `watchdog_count_1`, `watchdog_period_1`,
+and `watchdog_initial_1`.
+
+Watchdog entities are opt-in. Reloading may enable the watchdog; without a reliable reload automation it can power-cycle the Raspberry Pi. Set a suitable initial period for boot time. The integration does not reload it automatically.
+
 ## Testing
 
 With Python 3.14, install `homeassistant==2026.11.1`,
