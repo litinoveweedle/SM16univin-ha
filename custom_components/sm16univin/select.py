@@ -28,8 +28,11 @@ class InputTypeSelect(Select):
 async def async_setup_entry(hass, entry, async_add_entities):
     def create(config):
         return InputTypeSelect(
-            name=config[CONF_NAME], stack=config[CONF_STACK], type=config[CONF_TYPE],
-            chan=config[CONF_CHAN], card=CARD,
+            name=config[CONF_NAME],
+            stack=config[CONF_STACK],
+            type=config[CONF_TYPE],
+            chan=config[CONF_CHAN],
+            card=CARD,
         )
 
     await async_setup_entities(hass, entry, async_add_entities, "select", create, CARD)

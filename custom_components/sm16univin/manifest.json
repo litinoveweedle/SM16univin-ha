@@ -2,19 +2,13 @@
   "domain": "sm16univin",
   "name": "Sequent Microsystems Sixteen Analog/Digital Inputs Integration",
   "after_dependencies": [],
-  "codeowners": [
-    "@3lv",
-    "litinoveweedle"
-  ],
+  "codeowners": ["@3lv", "@litinoveweedle"],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/SequentMicrosystems/SM16univin-ha",
   "integration_type": "device",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/SequentMicrosystems/SM16univin-ha",
-  "requirements": [
-    "SM16univin>=1.1.0",
-    "SMcommonHA>=0.0.3"
-  ],
+  "requirements": ["SM16univin>=1.1.0", "SMcommonHA>=0.0.3"],
   "version": "1.0.0"
 }
